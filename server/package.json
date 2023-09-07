@@ -2,11 +2,10 @@
   "name": "assignment-1",
   "version": "1.0.0",
   "description": "Convert this from JS to typescript.",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.ts"
+    "start": "nodemon dist/index.js"
   },
   "keywords": [],
   "author": "",
