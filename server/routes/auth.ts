@@ -1,16 +1,21 @@
-const jwt = require("jsonwebtoken");
-const express = require('express');
-const { authenticateJwt, SECRET } = require("../middleware/");
-const { User } = require("../db");
+import jwt from "jsonwebtoken";
+import express from "express";
+import {authenticateJwt, SECRET } from "../middleware/index";
+import { User } from "../db";
 const router = express.Router();
 
+interface CreateUserInput {
+  username: string;
+  password: string;
+}
+
 router.post('/signup', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
+  const inputs : CreateUserInput = req.body;
+  const user = await User.findOne({ username : inputs.username });
   if (user) {
     res.status(403).json({ message: 'User already exists' });
   } else {
-    const newUser = new User({ username, password });
+    const newUser = new User({ username : inputs.username, password : inputs.password});
     await newUser.save();
     const token = jwt.sign({ id: newUser._id }, SECRET, { expiresIn: '1h' });
     res.json({ message: 'User created successfully', token });
@@ -18,8 +23,8 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username, password });
+  const inputs : CreateUserInput = req.body;
+  const user = await User.findOne({ username : inputs.username, password : inputs.password });
   if (user) {
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: '1h' });
     res.json({ message: 'Logged in successfully', token });
@@ -29,7 +34,8 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/me', authenticateJwt, async (req, res) => {
-  const user = await User.findOne({ _id: req.userId });
+  const userId = req.headers["userId"];
+  const user = await User.findOne({ _id: userId });
   if (user) {
     res.json({ username: user.username });
   } else {
@@ -37,4 +43,4 @@ router.get('/me', authenticateJwt, async (req, res) => {
   }
 });
 
-module.exports = router
+export default router
